@@ -1,6 +1,6 @@
 const imageRepository = require('../repositories/image.repository');
 const { resolveCountryByIp } = require('../utils/geo.util');
-const { uploadOriginalToFirebase, generateThumbnail, buildFirebasePublicUrl } = require('../utils/image.util');
+const { uploadOriginalToFirebase, generateThumbnail, buildFirebasePublicUrl, deleteLocalFileOnly } = require('../utils/image.util');
 const logger = require('../utils/logger.util');
 
 class ImageService {
@@ -14,7 +14,7 @@ class ImageService {
       throw err;
     }
 
-    // Upload original image to Firebase Storage and get relative path for DB
+    // Upload original image to Firebase Storage and get relative path for DB (local file remains for background compression)
     const storedImagePath = await uploadOriginalToFirebase(file.path);
 
     const country = resolveCountryByIp(clientIp);
@@ -72,6 +72,7 @@ class ImageService {
 
   /**
    * Background thumbnail compression worker.
+   * Generates thumbnail, uploads to Firebase, updates DB, and deletes local original image.
    */
   async compressImage(imageId) {
     const image = await imageRepository.findById(imageId);
@@ -83,9 +84,15 @@ class ImageService {
     if (!image.thumbPath) {
       const newThumbPath = await generateThumbnail(image.path);
       await imageRepository.updateThumbPath(imageId, newThumbPath);
+
+      // Clean up local original file ONLY AFTER thumbnail generation & upload succeed
+      deleteLocalFileOnly(image.path);
+
       return { success: true, message: 'Thumbnail created and saved successfully' };
     }
 
+    // If thumbnail already exists, ensure local original image is cleaned up
+    deleteLocalFileOnly(image.path);
     return { success: true, message: 'Thumbnail already exists' };
   }
 

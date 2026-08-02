@@ -28,8 +28,7 @@ function buildFirebasePublicUrl(filePath) {
 
 /**
  * Uploads an original image file to Firebase Storage and returns the database relative path.
- * Deletes the local file immediately after successful upload.
- * Throws error if Firebase upload fails.
+ * NOTE: Keeps the local original file intact so background thumbnail processing can consume it.
  * @param {string} localFilePath
  * @returns {Promise<string>} Relative path for database storage (e.g., image/filename.jpg).
  */
@@ -61,19 +60,13 @@ async function uploadOriginalToFirebase(localFilePath) {
 
   logger.info(`Original image uploaded to Firebase Storage: ${destination}`);
 
-  // Delete local file ONLY after upload succeeds
-  if (fs.existsSync(absolutePath)) {
-    fs.unlinkSync(absolutePath);
-    logger.info(`Cleaned up local original file after Firebase upload: ${absolutePath}`);
-  }
-
+  // Do NOT delete local file here. It must remain for background thumbnail compression.
   return relativePath;
 }
 
 /**
  * Generates a thumbnail using Sharp, uploads to Firebase Storage, and returns relative path for DB.
- * Deletes the local thumbnail file immediately after successful upload.
- * Throws error if Firebase upload fails.
+ * Deletes the local thumbnail file after successful upload.
  * @param {string} originalPathOrUrl
  * @returns {Promise<string>} Relative path for database storage (e.g., thumbnails/thumbnail_filename.jpg).
  */
@@ -118,7 +111,7 @@ async function generateThumbnail(originalPathOrUrl) {
     .jpeg({ quality: 90 })
     .toFile(thumbnailLocalPath);
 
-  // Clean temp file if created from URL
+  // Clean temp file if created from remote URL
   if (localImagePath.includes(path.join('..', '..', 'temp')) || localImagePath.includes('/temp/')) {
     try {
       if (fs.existsSync(localImagePath)) fs.unlinkSync(localImagePath);
@@ -179,9 +172,20 @@ async function deleteFile(pathOrUrl) {
   }
 
   // Local filesystem deletion
-  const absolutePath = path.isAbsolute(pathOrUrl)
-    ? pathOrUrl
-    : path.join(__dirname, '../../', pathOrUrl);
+  deleteLocalFileOnly(pathOrUrl);
+}
+
+/**
+ * Deletes only the local file from filesystem.
+ * @param {string|null} relativeOrAbsolutePath
+ */
+function deleteLocalFileOnly(relativeOrAbsolutePath) {
+  if (!relativeOrAbsolutePath) return;
+  if (relativeOrAbsolutePath.startsWith('http://') || relativeOrAbsolutePath.startsWith('https://')) return;
+
+  const absolutePath = path.isAbsolute(relativeOrAbsolutePath)
+    ? relativeOrAbsolutePath
+    : path.join(__dirname, '../../', relativeOrAbsolutePath);
 
   try {
     if (fs.existsSync(absolutePath)) {
@@ -210,5 +214,6 @@ module.exports = {
   buildFirebasePublicUrl,
   uploadOriginalToFirebase,
   generateThumbnail,
-  deleteFile
+  deleteFile,
+  deleteLocalFileOnly
 };
