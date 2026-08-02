@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DreamStudio V2 - Subscriptions & Devices Management</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome 6 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <!-- Custom Glassmorphic Theme -->
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<div class="app-wrapper">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+      </div>
+      <div>
+        <div class="brand-text">DreamStudio</div>
+        <div style="font-size: 0.7rem; color: #a855f7; font-weight: 700; letter-spacing: 1px;">BACKEND V2</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Main Menu</div>
+    <ul class="sidebar-nav">
+      <li>
+        <a href="/admin/index.html" class="nav-link">
+          <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="/admin/images.html" class="nav-link">
+          <i class="fa-solid fa-images"></i> Image Gallery
+        </a>
+      </li>
+      <li>
+        <a href="/admin/subscriptions.html" class="nav-link active">
+          <i class="fa-solid fa-id-card-clip"></i> Subscriptions
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Subscriptions & Users</h1>
+        <div class="page-subtitle">Manage user token allocations, subscriptions, and device blocking</div>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <span class="text-muted fs-7"><i class="fa-solid fa-clock-rotate-left me-1"></i>Auto Refresh in <strong id="refreshCountdown" class="text-info">05:00</strong></span>
+        <button id="manualRefreshBtn" class="btn btn-glass btn-glass-primary">
+          <i class="fa-solid fa-arrows-rotate me-1"></i> Refresh Now
+        </button>
+      </div>
+    </header>
+
+    <!-- Stat Summary Cards -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card stat-card">
+          <div class="stat-icon" style="background: var(--accent-cyan);">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <div class="stat-value" id="subStatTotal">--</div>
+          <div class="stat-title">Total Subscription Records</div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card stat-card">
+          <div class="stat-icon" style="background: var(--accent-emerald);">
+            <i class="fa-solid fa-user-check"></i>
+          </div>
+          <div class="stat-value" id="subStatActive">--</div>
+          <div class="stat-title">Active Devices</div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card stat-card">
+          <div class="stat-icon" style="background: var(--accent-rose);">
+            <i class="fa-solid fa-user-lock"></i>
+          </div>
+          <div class="stat-value" id="subStatBlocked">--</div>
+          <div class="stat-title">Blocked Devices</div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card stat-card">
+          <div class="stat-icon" style="background: var(--primary-gradient);">
+            <i class="fa-solid fa-coins"></i>
+          </div>
+          <div class="stat-value" id="subStatTokens">--</div>
+          <div class="stat-title">Available Tokens Remaining</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="glass-card p-3 mb-4">
+      <div class="row g-3 align-items-center">
+        <div class="col-12 col-md-6 col-lg-5">
+          <div class="input-group">
+            <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-color: var(--border-glass);">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text" id="subSearchInput" class="form-control form-control-glass border-start-0 ps-0" placeholder="Search device ID, order ID, SKU, package...">
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-3">
+          <select id="subStatusFilter" class="form-select form-control-glass">
+            <option value="all">All Block Statuses</option>
+            <option value="active">Active Devices</option>
+            <option value="blocked">Blocked Devices</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-3 col-lg-4 text-end">
+          <span class="text-muted fs-7">Showing <strong id="subDisplayedCount" class="text-white">0</strong> users</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subscriptions Table -->
+    <div class="glass-card p-0 mb-4">
+      <div class="custom-table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>SKU / Package</th>
+              <th>Order ID / Device ID</th>
+              <th>Available Tokens</th>
+              <th>Total Tokens</th>
+              <th>Purchase Time</th>
+              <th>Last Used</th>
+              <th>Status</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="subscriptionsTbody">
+            <tr>
+              <td colspan="8" class="text-center py-4 text-muted">Loading subscription records...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Subscriptions Script -->
+<script src="/admin/js/subscriptions.js"></script>
+</body>
+</html>

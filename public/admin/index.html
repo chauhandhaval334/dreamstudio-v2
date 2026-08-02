@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DreamStudio V2 - Admin Dashboard</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome 6 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <!-- Custom Glassmorphic Theme -->
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<div class="app-wrapper">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+      </div>
+      <div>
+        <div class="brand-text">DreamStudio</div>
+        <div style="font-size: 0.7rem; color: #a855f7; font-weight: 700; letter-spacing: 1px;">BACKEND V2</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Main Menu</div>
+    <ul class="sidebar-nav">
+      <li>
+        <a href="/admin/index.html" class="nav-link active">
+          <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="/admin/images.html" class="nav-link">
+          <i class="fa-solid fa-images"></i> Image Gallery
+        </a>
+      </li>
+      <li>
+        <a href="/admin/subscriptions.html" class="nav-link">
+          <i class="fa-solid fa-id-card-clip"></i> Subscriptions
+        </a>
+      </li>
+    </ul>
+
+    <div class="mt-auto pt-3 border-top border-secondary border-opacity-25">
+      <div class="d-flex align-items-center justify-content-between text-muted fs-7">
+        <span><i class="fa-solid fa-shield-halved text-success me-1"></i> Admin Auth Active</span>
+        <button id="refreshStatsBtn" class="btn btn-sm btn-outline-light border-0" title="Refresh Dashboard Stats">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Executive Dashboard</h1>
+        <div class="page-subtitle">Real-time stats and platform overview</div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <a href="/admin/images.html" class="btn btn-glass btn-glass-primary">
+          <i class="fa-solid fa-images"></i> Manage Images
+        </a>
+        <a href="/admin/subscriptions.html" class="btn btn-glass btn-glass-success">
+          <i class="fa-solid fa-users-gear"></i> Manage Users
+        </a>
+      </div>
+    </header>
+
+    <!-- Stat Cards Grid -->
+    <div class="row g-4 mb-4">
+      <!-- Total Images -->
+      <div class="col-12 col-sm-6 col-xl-4">
+        <div class="glass-card stat-card glass-card-interactive">
+          <div class="stat-icon" style="background: var(--primary-gradient);">
+            <i class="fa-solid fa-photo-film"></i>
+          </div>
+          <div class="stat-value" id="statTotalImages">--</div>
+          <div class="stat-title">Total Generated Images</div>
+        </div>
+      </div>
+
+      <!-- Approved Images -->
+      <div class="col-12 col-sm-6 col-xl-4">
+        <div class="glass-card stat-card glass-card-interactive">
+          <div class="stat-icon" style="background: var(--accent-emerald);">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div class="stat-value" id="statApprovedImages">--</div>
+          <div class="stat-title">Approved Images (Public)</div>
+        </div>
+      </div>
+
+      <!-- Pending Approval -->
+      <div class="col-12 col-sm-6 col-xl-4">
+        <div class="glass-card stat-card glass-card-interactive">
+          <div class="stat-icon" style="background: var(--accent-amber);">
+            <i class="fa-solid fa-hourglass-half"></i>
+          </div>
+          <div class="stat-value" id="statPendingImages">--</div>
+          <div class="stat-title">Pending Approval</div>
+        </div>
+      </div>
+
+      <!-- Total Users -->
+      <div class="col-12 col-sm-6 col-xl-4">
+        <div class="glass-card stat-card glass-card-interactive">
+          <div class="stat-icon" style="background: var(--accent-cyan);">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <div class="stat-value" id="statTotalUsers">--</div>
+          <div class="stat-title">Subscribed Devices & Users</div>
+        </div>
+      </div>
+
+      <!-- Blocked Users -->
+      <div class="col-12 col-sm-6 col-xl-4">
+        <div class="glass-card stat-card glass-card-interactive">
+          <div class="stat-icon" style="background: var(--accent-rose);">
+            <i class="fa-solid fa-user-slash"></i>
+          </div>
+          <div class="stat-value" id="statBlockedUsers">--</div>
+          <div class="stat-title">Blocked Devices</div>
+        </div>
+      </div>
+
+      <!-- Total Tokens Issued -->
+      <div class="col-12 col-sm-6 col-xl-4">
+        <div class="glass-card stat-card glass-card-interactive">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);">
+            <i class="fa-solid fa-coins"></i>
+          </div>
+          <div class="stat-value" id="statTotalTokens">--</div>
+          <div class="stat-title">Total Token Volume</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Preview Tables -->
+    <div class="row g-4">
+      <!-- Recent Images -->
+      <div class="col-12 col-xl-7">
+        <div class="glass-card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold m-0"><i class="fa-solid fa-sparkles text-primary me-2"></i>Recent Image Uploads</h5>
+            <a href="/admin/images.html" class="btn btn-sm btn-outline-light rounded-pill">View All</a>
+          </div>
+          <div class="custom-table-container">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Preview</th>
+                  <th>Prompt</th>
+                  <th>Model / Country</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="recentImagesTbody">
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-muted">Loading recent images...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Subscriptions -->
+      <div class="col-12 col-xl-5">
+        <div class="glass-card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold m-0"><i class="fa-solid fa-receipt text-success me-2"></i>Recent Subscriptions</h5>
+            <a href="/admin/subscriptions.html" class="btn btn-sm btn-outline-light rounded-pill">View All</a>
+          </div>
+          <div class="custom-table-container">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Device / Order</th>
+                  <th>Tokens</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="recentSubscriptionsTbody">
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-muted">Loading subscriptions...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Dashboard Script -->
+<script src="/admin/js/dashboard.js"></script>
+</body>
+</html>

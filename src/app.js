@@ -8,6 +8,7 @@ const imageRoutes = require("./routes/image.routes");
 const subscriptionRoutes = require("./routes/subscription.routes");
 const adminRoutes = require("./routes/admin.routes");
 const errorMiddleware = require("./middleware/error.middleware");
+const adminAuthMiddleware = require("./middleware/admin-auth.middleware");
 
 const app = express();
 
@@ -23,6 +24,14 @@ const staticImageDir = path.isAbsolute(uploadFolder)
 
 app.use('/image', express.static(staticImageDir));
 app.use('/thumbnails', express.static(path.join(__dirname, '../thumbnails')));
+
+// Serve Protected Admin Panel
+app.use('/admin', adminAuthMiddleware, express.static(path.join(__dirname, '../public/admin')));
+app.get('/admin', adminAuthMiddleware, (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin/index.html'));
+});
+
+// Serve Public Static Files
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Health check endpoint
