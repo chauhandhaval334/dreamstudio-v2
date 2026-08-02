@@ -1,6 +1,6 @@
 const imageRepository = require('../repositories/image.repository');
 const { resolveCountryByIp } = require('../utils/geo.util');
-const { uploadOriginalToFirebase, generateThumbnail, formatImageUrl } = require('../utils/image.util');
+const { uploadOriginalToFirebase, generateThumbnail, buildFirebasePublicUrl } = require('../utils/image.util');
 const logger = require('../utils/logger.util');
 
 class ImageService {
@@ -14,7 +14,7 @@ class ImageService {
       throw err;
     }
 
-    // Upload original image to Firebase Storage (or fallback to local file path)
+    // Upload original image to Firebase Storage and get relative path for DB
     const storedImagePath = await uploadOriginalToFirebase(file.path);
 
     const country = resolveCountryByIp(clientIp);
@@ -102,8 +102,8 @@ class ImageService {
     const listImages = results.map(result => ({
       id: result.id,
       prompt: result.prompt,
-      image: formatImageUrl(result.path),
-      thumbPath: result.thumbPath ? formatImageUrl(result.thumbPath) : null,
+      image: buildFirebasePublicUrl(result.path),
+      thumbPath: result.thumbPath ? buildFirebasePublicUrl(result.thumbPath) : null,
       time: result.time,
       modelName: result.modelName,
       stylePreset: result.stylePreset,
@@ -137,8 +137,8 @@ class ImageService {
     const listImages = results.map(result => ({
       id: result.id,
       prompt: result.prompt,
-      image: formatImageUrl(result.path),
-      thumbPath: result.thumbPath ? formatImageUrl(result.thumbPath) : null,
+      image: buildFirebasePublicUrl(result.path),
+      thumbPath: result.thumbPath ? buildFirebasePublicUrl(result.thumbPath) : null,
       time: result.time,
       modelName: result.modelName,
       stylePreset: result.stylePreset,
