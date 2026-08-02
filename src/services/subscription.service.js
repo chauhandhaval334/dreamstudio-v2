@@ -105,7 +105,7 @@ class SubscriptionService {
   }
 
   /**
-   * Gets order details by order ID.
+   * Gets order details by order ID. Supports both duration subscriptions and non-expiring token packs.
    */
   async getOrderDetails(orderId) {
     const order = await subscriptionRepository.findDetailsByOrderId(orderId);
@@ -117,13 +117,10 @@ class SubscriptionService {
 
     const { available_token, total_token, purchase_time, sku } = order;
     const durationInDays = skuDurations[sku];
-    if (!durationInDays) {
-      const err = new Error('Invalid SKU');
-      err.statusCode = 400;
-      throw err;
-    }
 
-    const expiration_time = new Date(Number(purchase_time) + (durationInDays * 24 * 60 * 60 * 1000)).toISOString();
+    const expiration_time = durationInDays
+      ? new Date(Number(purchase_time) + (durationInDays * 24 * 60 * 60 * 1000)).toISOString()
+      : null;
 
     return {
       order_id: orderId,
@@ -135,7 +132,7 @@ class SubscriptionService {
   }
 
   /**
-   * Gets order details by device ID.
+   * Gets order details by device ID. Supports both duration subscriptions and non-expiring token packs.
    */
   async getOrderDetailsByDeviceId(deviceId) {
     const order = await subscriptionRepository.findDetailsByDeviceId(deviceId);
@@ -149,8 +146,8 @@ class SubscriptionService {
     const durationInDays = skuDurations[sku];
 
     const expiration_time = durationInDays
-      ? new Date(Number(purchase_time)).getTime() + durationInDays * 24 * 60 * 60 * 1000
-      : -1;
+      ? new Date(Number(purchase_time) + (durationInDays * 24 * 60 * 60 * 1000)).toISOString()
+      : null;
 
     return {
       order_id,
